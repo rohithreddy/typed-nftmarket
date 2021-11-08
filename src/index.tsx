@@ -48,7 +48,7 @@ if (!rootElement) {
 
 function App ({ className }: Props): React.ReactElement<Props> | null {
   // API connectivity
-  const URL = 'wss://rpc-testnet.reefscan.com/ws';
+  const URL = 'wss://rpc.reefscan.com/ws';
   const [isApiConnected, setIsApiConnected] = useState(false);
   const [isApiInitialized, setIsApiInitialized] = useState(false);
 
@@ -64,8 +64,8 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
   const [evmProvider, setEvmProvider] = useState<Provider | null>(null);
 
   // Flipper contract values
-  const marketAdd = '0x19E1a2517E748b452F09e32e662B15b9ba4aA247'
-  const nftTokenAdd = '0x54655B72258a43553201Eb0202AF99560825A74B'
+  const marketAdd = '0x93De6dC7fcC2FA1aac73B34687eD1486d97fd76d'
+  const nftTokenAdd = '0x915129DEfAe29D9db2E29475B22ee872824F64d9'
 
   const [marketItems, setMarketItems] = useState<any>();
 
