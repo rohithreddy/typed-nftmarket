@@ -5,6 +5,8 @@ import { ethers } from 'ethers';
 import React, { useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
+
+
 import { web3Accounts, web3Enable } from '@polkadot/extension-dapp';
 import { InjectedExtension } from '@polkadot/extension-inject/types';
 import { Identicon } from '@polkadot/react-identicon';
@@ -16,7 +18,11 @@ import FixedMenuLayout from './components/FixedMenuLayout';
 
 // Semantic UI related imports
 import 'semantic-ui-css/semantic.min.css'
-import {Dropdown, Select } from 'semantic-ui-react';
+import {Dropdown, Select , Segment} from 'semantic-ui-react';
+
+
+import NFT from './artifacts/contracts/NFT.sol/NFT.json'
+import Market from './artifacts/contracts/Market.sol/NFTMarket.json'
 
 
 interface Props {
@@ -32,40 +38,6 @@ interface InjectedAccountExt {
   };
 }
 
-// Flipper ABI definition
-const FlipperAbi = [
-  {
-    inputs: [
-      {
-        internalType: 'bool',
-        name: 'initvalue',
-        type: 'bool'
-      }
-    ],
-    stateMutability: 'nonpayable',
-    type: 'constructor'
-  },
-  {
-    inputs: [],
-    name: 'flip',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    inputs: [],
-    name: 'get',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  }
-];
 
 const rootElement = document.getElementById('root');
 
@@ -91,11 +63,11 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
   const [evmProvider, setEvmProvider] = useState<Provider | null>(null);
 
   // Flipper contract values
-  const marketAddTestnet = '0x19E1a2517E748b452F09e32e662B15b9ba4aA247'
-  const nftTokenTestnet = '0x54655B72258a43553201Eb0202AF99560825A74B'
+  const marketAdd = '0x19E1a2517E748b452F09e32e662B15b9ba4aA247'
+  const nftTokenAdd = '0x54655B72258a43553201Eb0202AF99560825A74B'
 
-  const flipperContractAddressTestnet = '0x6252dC9516792DE316694D863271bd25c07E621B';
-  const [flipperValue, setFlipperValue] = useState('not called yet');
+  // const flipperContractAddressTestnet = '0x6252dC9516792DE316694D863271bd25c07E621B';
+  // const [flipperValue, setFlipperValue] = useState('not called yet');
 
   // DROPDOWN ACCOUNT SELECTION
   const _onChangeAccountId = useCallback(({ currentTarget: { value } }: React.SyntheticEvent<HTMLSelectElement>): void => {
@@ -151,14 +123,16 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
     if (!evmProvider || !accountId) return;
 
     const wallet = new EvmSigner(evmProvider, accountId, accountSigner);
-    const ercContract = new ethers.Contract(flipperContractAddressTestnet as string, FlipperAbi as any, wallet);
+    const marketContract = new ethers.Contract(marketAdd as string, Market.abi, wallet);
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
-    const value = await ercContract.get();
+    const marketItems = await marketContract.fetchMarketItems()
 
-    console.log('Value: ', value);
+    console.log("marketItems");
+    console.log(marketItems);
+    
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    setFlipperValue(value.toString());
+    // setFlipperValue(value.toString());
   }, [evmProvider, accountId, accountSigner]);
 
   // FLIPPER FLIP(): Call Flipper flip() function (the value will be swapped, funds are expended)
@@ -166,7 +140,7 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
     if (!evmProvider || !accountId) return;
 
     const wallet = new EvmSigner(evmProvider, accountId, accountSigner);
-    const ercContract = new ethers.Contract(flipperContractAddressTestnet as string, FlipperAbi as any, wallet);
+    const ercContract = new ethers.Contract(marketAdd as string, Market.abi, wallet);
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
@@ -281,72 +255,39 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
     return null;
   }
   const acMap = injectedAccounts.map(({address, meta: {name}}) => ({
-    key:address, value:address, text:name+' - '+address
+    key:address, value:address, text:name
+    // key:address, value:address, text:name+' - '+address
   }) );
 
   return (
     <div className={className}>
-            <HeaderMain></HeaderMain>
-      <h1>EVM contract interaction</h1>
+      <Segment color='black' className='no-border-radius' raised inverted>
+      <HeaderMain acmap={acMap} avalue={accountId} handleChanges={_onChangeAccountId1}></HeaderMain>
+      {/* <h1>EVM contract interaction</h1> */}
       <section>
-        <label>Account:</label>
-        <Dropdown placeholder='Select your Account' onChange={_onChangeAccountId1} options={acMap} value={accountId}/>
-        <section>{!evmAddress && isApiInitialized
+        <Dropdown placeholder='Select Account' className='drop-head' onChange={_onChangeAccountId1} options={acMap} value={accountId} />
+      </section>
+      </Segment>
+      <section>
+      {!evmAddress && isApiInitialized
           ? <p>No EVM address is bound to this address. The requests will fail.</p>
-          : <p>EVM address: {evmAddress}</p>}</section>
-      </section>
-      <section>
-        Market Deployed at address  : {marketAddTestnet}
+          : <p>EVM address: {evmAddress}</p>}
+      <label>Account:{accountId}</label>
+      <br />
+      <br/>
+        Market Deployed at address  : {marketAdd}
         <br/>
-        NFT Contact deployed at address :  {nftTokenTestnet}
+        NFT Contact deployed at address :  {nftTokenAdd}
       </section>
       <section>
-        <i>Example of interaction with Flipper contract ({flipperContractAddressTestnet})</i>
+        {/* <i>Example of interaction with Flipper contract ({flipperContractAddressTestnet})</i> */}
 
         <section>
-            Current value: <b>{flipperValue}</b>
+            {/* Current value: <b>{flipperValue}</b> */}
           <button onClick={_onClickGetContractValue}>Get value</button>
           <button onClick={_onClickFlipContractValue}>Flip value</button>
         </section>
       </section>
-
-      {/* <h1>Substrate account generation example</h1>
-      <section>
-        <button onClick={_onClickNew}>another random address</button>
-      </section>
-      <section>
-        <label>phrase</label>
-        <textarea
-          cols={40}
-          readOnly
-          rows={4}
-          value={phrase}
-        />
-      </section>
-      <section>
-        <label>icons</label>
-        <Identicon
-          className='icon'
-          value={address}
-        />
-        <Identicon
-          className='icon'
-          theme='polkadot'
-          value={address}
-        />
-        <Identicon
-          className='icon'
-          theme='beachball'
-          value={address}
-        />
-      </section>
-      <section>
-        <label>address</label>
-        {address}
-      </section>
-      <section>
-        <label>GraphQL</label>
-      </section> */}
     </div>
   );
 }
@@ -354,6 +295,9 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
 cryptoWaitReady()
   .then((): void => {
     keyring.loadAll({ ss58Format: 42, type: 'sr25519' });
-    ReactDOM.render(<App />, rootElement);
+    ReactDOM.render(
+      <App />,
+      document.getElementById('root')
+    );
   })
   .catch(console.error);

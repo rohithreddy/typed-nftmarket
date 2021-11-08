@@ -15,3 +15,15 @@ code {
 .no-border-radius{
   border-radius: 0px !important;
 }
+
+.drop-head{
+ background-color: white;
+ color: black;
+ border-radius: 1.5rem;
+ float: right;
+ padding: 0.7%;
+ display: inline-block;
+ vertical-align: middle;
+ margin-top: -3.5%;
+ /* top: -4rem; */
+}
