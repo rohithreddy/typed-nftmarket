@@ -23,6 +23,7 @@ import {Dropdown, Select , Segment, Card} from 'semantic-ui-react';
 
 import NFT from './artifacts/contracts/NFT.sol/NFT.json'
 import Market from './artifacts/contracts/Market.sol/NFTMarket.json'
+import axios from 'axios';
 
 
 interface Props {
@@ -118,20 +119,40 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
       setEvmAddress('');
     }
   }
-  const fetchNFTMarketItems = async (): Promise<void> => {
+  const fetchNFTMarketItems = async (): Promise<any> => {
     if (!evmProvider || !accountId) return;
 
     const wallet = new EvmSigner(evmProvider, accountId, accountSigner);
     const marketContract = new ethers.Contract(marketAdd as string, Market.abi, wallet);
+    const tokenContract = new ethers.Contract(nftTokenAdd as string, NFT.abi, wallet);
 
+  
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
     const marketItems = await marketContract.fetchMarketItems()
 
-    console.log("marketItems");
-    console.log(marketItems);
-    return marketItems;
-  }
+    const items = await Promise.all(marketItems.map(async (i: { tokenId: any; price: { toString: () => ethers.BigNumberish; }; itemId: { toNumber: () => any; }; seller: any; owner: any; }) => {
+      const tokenUri = await tokenContract.tokenURI(i.tokenId)
+      console.log(tokenUri)
+      const meta = await axios.get(tokenUri)
+      console.log(meta)
+      console.log("meta")
+      let price = ethers.utils.formatUnits(i.price.toString(), 'ether')
+      let item = {
+        price,
+        itemId: i.itemId.toNumber(),
+        seller: i.seller,
+        owner: i.owner,
+        image: meta.data.image,
+        name: meta.data.name,
+        description: meta.data.description,
+      }
+      console.log("item", item)
+      return item
+  }))
+  console.log("items", items)
+  return items
+}
 
   // FLIPPER GET(): Call Flipper get() function (view only, no funds are expended)
   const _onClickGetContractValue = useCallback(async (): Promise<void> => {
