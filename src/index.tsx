@@ -66,6 +66,7 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
   const marketAdd = '0x19E1a2517E748b452F09e32e662B15b9ba4aA247'
   const nftTokenAdd = '0x54655B72258a43553201Eb0202AF99560825A74B'
 
+  const [marketItems, setMarketItems] = useState<any>();
   // const flipperContractAddressTestnet = '0x6252dC9516792DE316694D863271bd25c07E621B';
   // const [flipperValue, setFlipperValue] = useState('not called yet');
 
@@ -117,19 +118,38 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
       setEvmAddress('');
     }
   }
-
-  // FLIPPER GET(): Call Flipper get() function (view only, no funds are expended)
-  const _onClickGetContractValue = useCallback(async (): Promise<void> => {
+  const fetchNFTMarketItems = async (): Promise<void> => {
     if (!evmProvider || !accountId) return;
 
     const wallet = new EvmSigner(evmProvider, accountId, accountSigner);
     const marketContract = new ethers.Contract(marketAdd as string, Market.abi, wallet);
+
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
     const marketItems = await marketContract.fetchMarketItems()
 
     console.log("marketItems");
     console.log(marketItems);
+    return marketItems;
+  }
+
+  // FLIPPER GET(): Call Flipper get() function (view only, no funds are expended)
+  const _onClickGetContractValue = useCallback(async (): Promise<void> => {
+    fetchNFTMarketItems().then((result) => {
+      console.log(result);
+      console.log("=============AGAIN")
+    }).catch((error) => {})
+    // if (!evmProvider || !accountId) return;
+
+    // const wallet = new EvmSigner(evmProvider, accountId, accountSigner);
+    // const marketContract = new ethers.Contract(marketAdd as string, Market.abi, wallet);
+
+
+    // // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
+    // const marketItems = await marketContract.fetchMarketItems()
+
+    // console.log("marketItems");
+    // console.log(marketItems);
     
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     // setFlipperValue(value.toString());
@@ -206,6 +226,7 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
             setInjectedAccounts(accounts);
             setAccountId(accounts[0].address);
             console.log('Accounts:address ', accounts[0].address);
+            
           })
           .catch((error): InjectedAccountExt[] => {
             console.error('web3Enable', error);
@@ -248,6 +269,14 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
   }, []);
 
   useEffect((): void => {
+    fetchNFTMarketItems().then((result) => {
+      console.log(result);
+      console.log("=============USEEFFECT")
+      setMarketItems(result);
+    }).catch((error) => {})
+  }, [marketAdd, accountId, accountSigner]);
+
+  useEffect((): void => {
     address && setAddress(keyring.encodeAddress(address, SS58_FORMAT));
   }, [address]);
 
@@ -258,6 +287,7 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
     key:address, value:address, text:name
     // key:address, value:address, text:name+' - '+address
   }) );
+
 
   return (
     <div className={className}>
@@ -288,6 +318,13 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
           <button onClick={_onClickFlipContractValue}>Flip value</button>
         </section>
       </section>
+      { !marketItems ? (
+        <div>ITEMS None   </div>
+      ) : (
+        <div>
+          Items Present {marketItems.toString()}
+        </div>
+      )}
     </div>
   );
 }

@@ -5,8 +5,6 @@ import React, { Fragment } from 'react'
 
 
 const HeaderMain = (props:any) => {
-  console.log("The props")
-  console.log(props)
   return (
     <>
     {/* <Segment color='black' className='no-border-radius' raised inverted> */}
