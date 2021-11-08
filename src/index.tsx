@@ -14,11 +14,11 @@ import { WsProvider } from '@polkadot/rpc-provider';
 import { keyring } from '@polkadot/ui-keyring';
 import { cryptoWaitReady, mnemonicGenerate } from '@polkadot/util-crypto';
 import HeaderMain from './components/HeaderMain';
-import FixedMenuLayout from './components/FixedMenuLayout';
+import CardColored from './components/CardColored';
 
 // Semantic UI related imports
 import 'semantic-ui-css/semantic.min.css'
-import {Dropdown, Select , Segment} from 'semantic-ui-react';
+import {Dropdown, Select , Segment, Card} from 'semantic-ui-react';
 
 
 import NFT from './artifacts/contracts/NFT.sol/NFT.json'
@@ -322,7 +322,11 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
         <div>ITEMS None   </div>
       ) : (
         <div>
-          Items Present {marketItems.toString()}
+          Items Present 
+          <CardColored items={marketItems}>
+
+          </CardColored>
+          {/* {marketItems.toString()} */}
         </div>
       )}
     </div>
