@@ -5,6 +5,7 @@
   "dependencies": {
     "@polkadot/extension-dapp": "^0.40.4",
     "@polkadot/react-identicon": "^0.86.5",
+    "@polkadot/ui-keyring": "^0.86.5",
     "@reef-defi/evm-provider": "^1.0.3",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
@@ -16,6 +17,8 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
+    "semantic-ui-css": "^2.4.1",
+    "semantic-ui-react": "^2.0.4",
     "typescript": "^4.1.2",
     "web-vitals": "^1.0.1"
   },
