@@ -18,7 +18,7 @@ import CardColored from './components/CardColored';
 
 // Semantic UI related imports
 import 'semantic-ui-css/semantic.min.css'
-import {Dropdown, Select , Segment, Card} from 'semantic-ui-react';
+import {Dropdown, Select , Segment, Card, Container, Header} from 'semantic-ui-react';
 
 
 import NFT from './artifacts/contracts/NFT.sol/NFT.json'
@@ -68,14 +68,31 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
   const nftTokenAdd = '0x54655B72258a43553201Eb0202AF99560825A74B'
 
   const [marketItems, setMarketItems] = useState<any>();
-  // const flipperContractAddressTestnet = '0x6252dC9516792DE316694D863271bd25c07E621B';
-  // const [flipperValue, setFlipperValue] = useState('not called yet');
+
 
   // DROPDOWN ACCOUNT SELECTION
   const _onChangeAccountId = useCallback(({ currentTarget: { value } }: React.SyntheticEvent<HTMLSelectElement>): void => {
     setAccountId(value);
     console.log(`Selected account: ${value}`);
   }, []);
+
+  const buyNft =  async (e:any, data:any ) => {
+    console.log("data", data)
+    console.log("e", e)
+    console.log(data.item_id, "itemId")
+    console.log(data.nft_contract, "contract_add")
+    if (!evmProvider || !accountId) return;
+
+    const wallet = new EvmSigner(evmProvider, accountId, accountSigner);
+    const marketContract = new ethers.Contract(marketAdd as string, Market.abi, wallet);
+    const buyNftTxn = await marketContract.createMarketSale(data.nft_contract, data.item_id, {value: ethers.utils.parseEther(data.price)});
+    console.log(buyNftTxn, "BuyTxn")
+    alert("Bought Item sucessfully")
+    const newItems = await fetchNFTMarketItems();
+    console.log(newItems, "newItems")
+    setMarketItems(newItems)
+
+  }
 
   const _onChangeAccountId1 = async (e:any, {value}:any) => {
     setAccountId(value);
@@ -131,7 +148,7 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
     const marketItems = await marketContract.fetchMarketItems()
 
-    const items = await Promise.all(marketItems.map(async (i: { tokenId: any; price: { toString: () => ethers.BigNumberish; }; itemId: { toNumber: () => any; }; seller: any; owner: any; }) => {
+    const items = await Promise.all(marketItems.map(async (i: { tokenId: any;  nftContract: any; price: { toString: () => ethers.BigNumberish; }; itemId: { toNumber: () => any; }; seller: any; owner: any;  }) => {
       const tokenUri = await tokenContract.tokenURI(i.tokenId)
       console.log(tokenUri)
       const meta = await axios.get(tokenUri)
@@ -146,6 +163,7 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
         image: meta.data.image,
         name: meta.data.name,
         description: meta.data.description,
+        nftContract: i.nftContract,
       }
       console.log("item", item)
       return item
@@ -319,34 +337,34 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
         <Dropdown placeholder='Select Account' className='drop-head' onChange={_onChangeAccountId1} options={acMap} value={accountId} />
       </section>
       </Segment>
+      
       <section>
-      {!evmAddress && isApiInitialized
+      <div >
+      <Segment.Group horizontal raised className='account-info' >
+        <Segment textAlign='center'>Account: {accountId}</Segment>
+        <Segment textAlign='center'>
+        {!evmAddress && isApiInitialized
           ? <p>No EVM address is bound to this address. The requests will fail.</p>
           : <p>EVM address: {evmAddress}</p>}
-      <label>Account:{accountId}</label>
-      <br />
-      <br/>
-        Market Deployed at address  : {marketAdd}
-        <br/>
+        </Segment>
+        <Segment textAlign='center'>
         NFT Contact deployed at address :  {nftTokenAdd}
+        </Segment>
+        </Segment.Group>
+        </div>
       </section>
       <section>
-        {/* <i>Example of interaction with Flipper contract ({flipperContractAddressTestnet})</i> */}
-
-        <section>
-            {/* Current value: <b>{flipperValue}</b> */}
-          <button onClick={_onClickGetContractValue}>Get value</button>
-          <button onClick={_onClickFlipContractValue}>Flip value</button>
-        </section>
       </section>
       { !marketItems ? (
-        <div>ITEMS None   </div>
+        <div>No Items listed for Sale : come back later</div>
       ) : (
         <div>
-          Items Present 
-          <CardColored items={marketItems}>
+          <Container>
+          <Header as='h2' textAlign='center'>NFTs Listed for Sale</Header>
+          <CardColored items={marketItems} buyNft={buyNft}>
 
           </CardColored>
+          </Container>
           {/* {marketItems.toString()} */}
         </div>
       )}

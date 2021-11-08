@@ -27,3 +27,23 @@ code {
  margin-top: -3.5%;
  /* top: -4rem; */
 }
+
+.account-info{
+  margin-left: 2rem !important;
+  margin-right: 2rem !important;
+}
+
+.item-seller {
+  overflow: hidden;
+}
+
+.item-info {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.item-name{
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
