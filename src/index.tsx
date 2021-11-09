@@ -233,7 +233,7 @@ function App ({ className }: Props): React.ReactElement<Props> | null {
 
   useEffect((): void => {
     // Polkadot.js extension initialization as per https://polkadot.js.org/docs/extension/usage/
-    const injectedPromise = web3Enable('@reef-defi/ui-example');
+    const injectedPromise = web3Enable('ReeFTY Market');
 
     const evmProvider = new Provider({
       provider: new WsProvider(URL)
